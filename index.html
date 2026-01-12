@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Username Wall</title>
+<title>Username Wall + Explosion</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -12,6 +12,7 @@
     flex-direction: column;
     align-items: center;
     padding: 50px;
+    overflow-x: hidden;
   }
 
   #usernameForm {
@@ -30,18 +31,51 @@
 
   #userList {
     display: flex;
-    flex-wrap: wrap; /* Hace que baje a la siguiente línea automáticamente */
-    gap: 10px;       /* Espacio entre nombres */
+    flex-wrap: wrap;
+    gap: 10px;
     max-width: 100%;
-    justify-content: flex-start; /* Alinea a la izquierda */
+    justify-content: flex-start;
   }
 
   .user {
     font-size: 1.2em;
     color: black;
-    margin: 0;       /* Sin recuadro ni borde */
+    margin: 0;
     padding: 0;
-    white-space: nowrap; /* Evita que el nombre se rompa */
+    white-space: nowrap;
+  }
+
+  #explosionBtn {
+    display: none;
+    margin-top: 20px;
+    padding: 15px 25px;
+    font-size: 1.2em;
+    cursor: pointer;
+  }
+
+  #explosionBtn:active {
+    background-color: #ff4444;
+    color: white;
+  }
+
+  #explosionImg {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    max-width: 100%;
+    max-height: 100%;
+    opacity: 1;
+    pointer-events: none;
+    transition: transform 3s ease-out, opacity 3s ease-out;
+  }
+
+  #winText {
+    display: none;
+    color: yellow;
+    font-size: 3em;
+    margin-top: 30px;
+    text-align: center;
   }
 </style>
 </head>
@@ -55,14 +89,30 @@
 
 <div id="userList"></div>
 
+<!-- Explosion button -->
+<button id="explosionBtn">💥 Press me 💥</button>
+
+<!-- Explosion image -->
+<img id="explosionImg" src="explosion.png" alt="Explosion">
+
+<!-- Win text -->
+<div id="winText">You win?</div>
+
+<!-- Explosion audio -->
+<audio id="explosionAudio" src="explosion.mp3"></audio>
+
 <script>
   const form = document.getElementById('usernameForm');
   const input = document.getElementById('userInput');
   const userList = document.getElementById('userList');
+  const explosionBtn = document.getElementById('explosionBtn');
+  const explosionImg = document.getElementById('explosionImg');
+  const winText = document.getElementById('winText');
+  const explosionAudio = document.getElementById('explosionAudio');
 
   // Cargar nombres guardados en localStorage
   let usernames = JSON.parse(localStorage.getItem('usernames')) || [];
-  let added = localStorage.getItem('added'); // bandera para 1 por navegador
+  let added = localStorage.getItem('added'); // 1 por navegador
 
   function renderUsernames() {
     userList.innerHTML = '';
@@ -76,10 +126,11 @@
 
   renderUsernames();
 
+  // Submit username
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     if (added) {
-      alert("You can only add one username per ip.");
+      alert("You can only add one username per browser.");
       return;
     }
 
@@ -92,6 +143,34 @@
 
     renderUsernames();
     input.value = '';
+
+    // Mostrar botón de explosión
+    explosionBtn.style.display = 'inline-block';
+  });
+
+  // Explosión
+  explosionBtn.addEventListener('click', () => {
+    // Reiniciar estilos
+    explosionImg.style.transition = 'none';
+    explosionImg.style.transform = 'translateX(-50%) scale(0)';
+    explosionImg.style.opacity = '1';
+
+    // Forzar reflow para reiniciar animación
+    void explosionImg.offsetWidth;
+
+    // Activar transición
+    explosionImg.style.transition = 'transform 3s ease-out, opacity 3s ease-out';
+    explosionImg.style.transform = 'translateX(-50%) scale(3)'; // crece hasta casi llenar pantalla
+    explosionImg.style.opacity = '0';
+
+    // Reproducir sonido
+    explosionAudio.currentTime = 0;
+    explosionAudio.play();
+
+    // Mostrar "You win?" después de 3s
+    setTimeout(() => {
+      winText.style.display = 'block';
+    }, 3000);
   });
 </script>
 
