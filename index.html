@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Username Wall</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 50px;
+  }
+
+  #usernameForm {
+    margin-bottom: 30px;
+  }
+
+  #userInput {
+    padding: 10px;
+    font-size: 1em;
+  }
+
+  #submitBtn {
+    padding: 10px 15px;
+    font-size: 1em;
+  }
+
+  #userList {
+    display: flex;
+    flex-wrap: wrap; /* Hace que baje a la siguiente línea automáticamente */
+    gap: 10px;       /* Espacio entre nombres */
+    max-width: 100%;
+    justify-content: flex-start; /* Alinea a la izquierda */
+  }
+
+  .user {
+    font-size: 1.2em;
+    color: black;
+    margin: 0;       /* Sin recuadro ni borde */
+    padding: 0;
+    white-space: nowrap; /* Evita que el nombre se rompa */
+  }
+</style>
+</head>
+<body>
+
+<h2>Enter your username:</h2>
+<form id="usernameForm">
+  <input type="text" id="userInput" placeholder="Username" required>
+  <button type="submit" id="submitBtn">Submit</button>
+</form>
+
+<div id="userList"></div>
+
+<script>
+  const form = document.getElementById('usernameForm');
+  const input = document.getElementById('userInput');
+  const userList = document.getElementById('userList');
+
+  // Cargar nombres guardados en localStorage
+  let usernames = JSON.parse(localStorage.getItem('usernames')) || [];
+  let added = localStorage.getItem('added'); // bandera para 1 por navegador
+
+  function renderUsernames() {
+    userList.innerHTML = '';
+    usernames.forEach(name => {
+      const span = document.createElement('span');
+      span.className = 'user';
+      span.textContent = name;
+      userList.appendChild(span);
+    });
+  }
+
+  renderUsernames();
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (added) {
+      alert("You can only add one username per ip.");
+      return;
+    }
+
+    const username = input.value.trim();
+    if (username === '') return;
+
+    usernames.push(username);
+    localStorage.setItem('usernames', JSON.stringify(usernames));
+    localStorage.setItem('added', 'true');
+
+    renderUsernames();
+    input.value = '';
+  });
+</script>
+
+</body>
+</html>
